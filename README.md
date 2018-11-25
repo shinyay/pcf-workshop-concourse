@@ -289,6 +289,13 @@ $ fly -t hello-ci set-pipeline -p simple-pipeline -c pipeline-build-and-deploy.y
 
 ![build deploy pipeline](images/build-deploy-pipeline.png)
 
+
+#### アプリケーションの更新
+
+```
+
+```
+
 ## まとめ / 振り返り
 
 ### 今回のソース
