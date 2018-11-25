@@ -207,6 +207,86 @@ started simple-pipeline/unit-test #1
 
 ![unit test succeed](images/unit-test-succeed.png)
 
+### ビルド＆デプロイ用パイプラインの追加
+#### パイプラインの作成
+ビルド＆デプロイ用の処理が追加されたパイプラインを作成します。
+以下の YAML の記述で `<YOUR_USERID>` `<YOUR_PASSWD>` `<YOUR_ORG>` をそれぞれ自分の情報に書き換えます。
+
+- pipeline-build-and-deploy.yml
+
+```yaml
+
+---
+resources:
+- name: pcfapp
+  type: git
+  source:
+    uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
+    branch: master
+  check_every: 10s
+  - name: deploy-to-cf
+    type: cf
+    source:
+      api: api.run.pivotal.io
+      username: <YOUR_USERID>
+      password: <YOUR_PASSWD>
+      organization: <YOUR_ORG>
+      space: development
+      skip_cert_check: true
+jobs:
+- name: unit-test
+  plan:
+  - get: pcfapp
+    trigger: true
+  - task: gradle-test
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          {repository: java, tag: openjdk-8}
+      inputs:
+      - name: pcfapp
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          cd pcfapp
+          ./gradlew tasks
+- name: build-and-deploy
+  plan:
+  - get: pcfapp
+    passed: [ unit-test ]
+    trigger: true
+  - task: build
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          {repository: java, tag: openjdk-8}
+      inputs:
+      - name: pcfapp
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          cd pcfapp
+          ./gradlew clean build -x test
+  - put: deploy-to-cf
+    params:
+      manifest: pcfapp/manifest.yml
+      current_app_name: hello-pcf-upgrade
+```
+
+#### パイプラインの更新
+
+```
+$ fly -t hello-ci set-pipeline -p simple-pipeline -c pipeline-build-and-deploy.yml
+```
+
 ## まとめ / 振り返り
 
 ### 今回のソース
