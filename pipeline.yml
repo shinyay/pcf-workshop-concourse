@@ -1,0 +1,29 @@
+---
+resources:
+- name: pcfapp
+  type: git
+  source:
+    uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
+    branch: master
+  check_every: 10s
+jobs:
+- name: unit-test
+  plan:
+  - get: pcfapp
+    trigger: true
+  - task: gradle-test
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          {repository: java, tag: openjdk-8}
+      inputs:
+      - name: pcfapp
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          cd pcfapp
+          ./gradlew tasks
