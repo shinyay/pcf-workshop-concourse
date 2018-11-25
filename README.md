@@ -224,15 +224,15 @@ resources:
     uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
     branch: master
   check_every: 10s
-  - name: deploy-to-cf
-    type: cf
-    source:
-      api: api.run.pivotal.io
-      username: <YOUR_USERID>
-      password: <YOUR_PASSWD>
-      organization: <YOUR_ORG>
-      space: development
-      skip_cert_check: true
+- name: deploy-to-cf
+  type: cf
+  source:
+    api: api.run.pivotal.io
+    username: <YOUR_USERID>
+    password: <YOUR_PASSWD>
+    organization: <YOUR_ORG>
+    space: development
+    skip_cert_check: true
 jobs:
 - name: unit-test
   plan:
@@ -286,6 +286,8 @@ jobs:
 ```
 $ fly -t hello-ci set-pipeline -p simple-pipeline -c pipeline-build-and-deploy.yml
 ```
+
+![build deploy pipeline](images/build-deploy-pipeline.png)
 
 ## まとめ / 振り返り
 
