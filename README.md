@@ -9,6 +9,9 @@ Pivotal Cloud Foundry への継続的デリバリを **Concourse** を用いて�
 
 ## 手順 / 解説
 ### Concourse 環境の準備 (Docker)
+Docker コンテナとして動作する Concourse を使用します。
+事前に Docker をインストールします。
+
 #### Docker のインストール
 - MacOS
 
@@ -23,14 +26,21 @@ yum install docker -y
 ```
 
 #### Concourse コンテナの準備
+Concourse コンテナを使用するための定義ファイル (**docker-compose.yml**) を提供している GihHub リポジトリをクローンして使用します。
 
 ```
 $ git clone https://github.com/concourse/concourse-docker.git
+```
+
+Concourseのための鍵ファイルを作成します。
+以下のスクリプトを実行します。
+
+```
 $ cd concourse-docker
 $ ./generate-keys.sh
 ```
 
-- `CONCOURSE_EXTERNAL_URL` をローカルにアサインされたIPアドレスでアクセスするように設定
+`CONCOURSE_EXTERNAL_URL` をローカルにアサインされたIPアドレスでアクセスするように設定します。
 
 ```
 $ export CONCOURSE_EXTERNAL_URL=http://$(ipconfig getifaddr en0):8080
@@ -83,19 +93,33 @@ $ fly --version
 ```
 
 ### アップグレード前のアプリケーションのデプロイ
+#### アップグレード前のアプリケーションの準備
+GitHub リポジトリ `https://github.com/shinyay/pcf-workshop-upgrade-code.git` をクローンして使用します。
+このリポジトリの `before-upgrade` ブランチにアップグレード前のソースコードが入っているのでブランチを切り替えます。
 
 ```
 $ git clone https://github.com/shinyay/pcf-workshop-upgrade-code.git
 $ git checkout before-upgrade
 ```
 
+アプリケーションをビルドしてデプロイを行います。
+
 ```
+$ ./gradlew clean build -x test
 $ cf push
 ```
 
+#### アップグレード前のアプリケーションの確認
+cURL コマンドでアプリケーションにアクセスし、動作確認を行います。
+確認するには、以下のコマンドを使用します。
+
 ```
 $ curl http://<アプリケーションURL> 
+```
 
+実行結果として以下が表示される事が確認できます。
+
+```
 MMMMMMMMMMMMMMMMMWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMFMMMMMMM
 M]                 ?WMMMMMM#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF    .M
 M]    ........       .HMMMM#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF!`  .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF    .M
