@@ -167,6 +167,13 @@ or enter token manually:
 target saved
 ```
 
+ログイン時に提示される URL にアクセスし、ログインします。
+
+- User: test
+- Pass: test
+
+![initial login](images/initial-login.png)
+
 #### パイプラインの作成
 単体テストを実行するパイプラインの定義を作成します。
 `pipeline.yml` という名前でファイルを作成し、以下の内容を記述します。
