@@ -1,23 +1,23 @@
 ---
 resources:
-  - name: pcfapp
-    type: git
-    source:
-      uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
-      branch: master
-    check_every: 10s
-  - name: deploy-to-cf
-    type: cf
-    source:
-      api: api.run.pivotal.io
-      username: <YOUR_USERID>
-      password: <YOUR_PASSWD>
-      organization: <YOUR_ORG>
-      space: development
-      skip_cert_check: true
+- name: pcfapp
+  type: git
+  source:
+    uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
+    branch: master
+  check_every: 10s
+- name: deploy-to-cf
+  type: cf
+  source:
+    api: api.run.pivotal.io
+    username: <YOUR_USERID>
+    password: <YOUR_PASSWD>
+    organization: <YOUR_ORG>
+    space: development
+    skip_cert_check: true
 jobs:
-  - name: unit-test
-    plan:
+- name: unit-test
+  plan:
   - get: pcfapp
     trigger: true
   - task: gradle-test
@@ -36,8 +36,8 @@ jobs:
         - |
           cd pcfapp
           ./gradlew test
-  - name: build-and-deploy
-    plan:
+- name: build-and-deploy
+  plan:
   - get: pcfapp
     passed: [ unit-test ]
     trigger: true
@@ -50,6 +50,8 @@ jobs:
           {repository: java, tag: openjdk-8}
       inputs:
       - name: pcfapp
+      outputs:
+      - name: out
       run:
         path: bash
         args:
@@ -57,8 +59,9 @@ jobs:
         - |
           cd pcfapp
           ./gradlew clean build -x test
-          ls -lR
+          mv build/libs/hello-pcf-upgrade-0.0.1-SNAPSHOT.jar ../out
   - put: deploy-to-cf
     params:
       manifest: pcfapp/manifest.yml
       current_app_name: hello-pcf-upgrade
+      path: out/hello-pcf-upgrade-0.0.1-SNAPSHOT.jar
