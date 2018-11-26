@@ -297,6 +297,9 @@ started simple-pipeline/unit-test #1
 ![unit test succeed](images/unit-test-succeed.png)
 
 ### ビルド＆デプロイ用パイプラインの追加
+次にジョブの連携を行います。
+ここでは、先に定義した **単体テスト** ジョブに、**ビルド＆デプロイ** ジョブを連携したパイプラインを定義します。
+ 
 #### パイプラインの作成
 ビルド＆デプロイ用の処理が追加されたパイプラインを作成します。
 以下の YAML の記述で `<YOUR_USERID>` `<YOUR_PASSWD>` `<YOUR_ORG>` をそれぞれ自分の情報に書き換えます。
@@ -342,7 +345,7 @@ jobs:
         - -c
         - |
           cd pcfapp
-          ./gradlew tasks
+          ./gradlew test
 - name: build-and-deploy
   plan:
   - get: pcfapp
@@ -357,6 +360,8 @@ jobs:
           {repository: java, tag: openjdk-8}
       inputs:
       - name: pcfapp
+      outputs:
+      - name: out
       run:
         path: bash
         args:
@@ -364,10 +369,12 @@ jobs:
         - |
           cd pcfapp
           ./gradlew clean build -x test
+          mv build/libs/hello-pcf-upgrade-0.0.1-SNAPSHOT.jar ../out
   - put: deploy-to-cf
     params:
       manifest: pcfapp/manifest.yml
       current_app_name: hello-pcf-upgrade
+      path: out/hello-pcf-upgrade-0.0.1-SNAPSHOT.jar
 ```
 
 #### パイプラインの更新
