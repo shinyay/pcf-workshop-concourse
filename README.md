@@ -119,6 +119,8 @@ $ curl http://<アプリケーションURL>
 ```
 
 実行結果として以下が表示される事が確認できます。
+`Pivotal` の i が抜けて `P votal` となっています。
+これを `Pivotal` となるように後の手順で修正します。
 
 ```
 MMMMMMMMMMMMMMMMMWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMFMMMMMMM
@@ -302,6 +304,7 @@ started simple-pipeline/unit-test #1
  
 #### パイプラインの作成
 ビルド＆デプロイ用の処理が追加されたパイプラインを作成します。
+`pipeline-build-and-deploy.yml` を作成し、
 以下の YAML の記述で `<YOUR_USERID>` `<YOUR_PASSWD>` `<YOUR_ORG>` をそれぞれ自分の情報に書き換えます。
 
 - pipeline-build-and-deploy.yml
@@ -378,19 +381,64 @@ jobs:
 ```
 
 #### パイプラインの更新
+`pipeline-build-and-deploy.yml` を Concourse に反映します。
+
+反映するには、以下のコマンドを使用します。
 
 ```
 $ fly -t hello-ci set-pipeline -p simple-pipeline -c pipeline-build-and-deploy.yml
 ```
+#### パイプラインの確認
+ブラウザから Concourse にアクセスして登録したパイプラインを確認します。
+
+- http://<CONCOURSE_EXTERNAL_URL>/teams/main/pipelines/simple-pipeline
 
 ![build deploy pipeline](images/build-deploy-pipeline.png)
 
+ビルド＆デプロイ用のジョブが追加されている事が確認できます。
+
+### 継続的デリバリの実施
+先にデプロイしているアプリケーションが出力するアスキーアートは、`P votal` でした。
+これを、`Pivotal` に修正し、自動で Pivotal Cloud Foundry へデプロイします。
 
 #### アプリケーションの更新
 
-```
+- HelloPcfUpgradeApplication.java のアスキーアートの修正
+  - 以下のアスキーアートに置き換えます。
 
 ```
+        return "MMMMMMMMMMMMMMMMMWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMFMMMMMMM\n"+
+                "M]                 ?WMMMMMM#     MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF    .M\n"+
+                "M]    ........       .HMMMM#     MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF!`  .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF    .M\n"+
+                "M]    .MMMMMMMMNa.     MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM[    .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMF    .M\n"+
+                "M]    .MMMMMMMMMMN     (MMMMHHHHHMMMMHHHHHHMMMMMMMMMMMMMMHHHHHMMMMMMMMMMMMHMMMMMMMMMMMMMM[    .HHHHHHHHMMMMMMMMMMYMMMMMMMHMMMMMMMMMF    .M\n"+
+                "M]    .MMMMMMMMMMM{    .MMM#     MMMF      HMMMMMMMMMMMMF    .MMMMM#M`         .TMMMMMMMM[            .MMMMMM@M               ,MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMM`    .MMM#     MMMh..    .MMMMMMMMMMMM`   .MMMMB!      ...      ,HMMMMM[    .........MMMM@`     ........    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMM^     JMMM#     MMMMMM]    4MMMMMMMMMM]    dMMMF    ..MMMMMMNJ     UMMMM[    .MMMMMMMMMMMF     .MMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMM=`      .MMMM#     MMMMMMM,    MMMMMMMMM#    .MMMF    .MMMMMMMMMMN.    MMMM[    .MMMMMMMMMMM`    MMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMM          .MMMMMM#     MMMMMMMN    (MMMMMMMM^   .MMMM%    dMMMMMMMMMMMb    (MMM[    .MMMMMMMMMM#    .MMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMM.  ....(MMMMMMMMM#     MMMMMMMM]    MMMMMMMF    JMMMM)    MMMMMMMMMMMM#    .MMM[    .MMMMMMMMMMF    (MMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMM,   .MMMMMM`   .MMMMM)    MMMMMMMMMMMM#    .MMM[    .MMMMMMMMMMF    (MMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMMb    dMMMMt   .MMMMMM)    MMMMMMMMMMMMF    -MMM[    .MMMMMMMMMM#    .MMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMMM[   .MMM#    (MMMMMMb    -MMMMMMMMMMM^    dMMM[    .MMMMMMMMMMM,    UMMMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMMMN.   (MM'   .MMMMMMMM,    -MMMMMMMM#'    .MMMM]    .MMMMMMMMMMMN.    ?HMMMMMMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMMMMb    7^    MMMMMMMMMMx      ?MMM^      .MMMMMb       `````(MMMMN,         JMMF    .MMMMF    .M\n"+
+                "M]    .MMMMMMMMMMMMMMMMMMMM#     MMMMMMMMMMMMb       .dMMMMMMMMMMMNJ.           ..MMMMMMMMN.          .MMMMMMN,.      JMMF    .MMMMF    .M\n"+
+                "MNMMMMNMMMMMMMMMMMMMMMMMMMMNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMMMMMMMMMMMMMMMMMMMMMMNMMMMMMMNMMMMMMMMMMMNNMMMMMNMMMMMMMMMNMMMMNM\n"
+                +"\r\n"
+```
+
+#### パイプラインの開始
+修正したアプリケーションを GitHub へコミット＆プッシュします。
+GitHub の更新をトリガーに、パイプラインが開始します。
+
+```
+$ git add .
+$ git commit -m 'Modify ascii art'
+$ git push origin master
+```
+
+![build deploy pipeline start](images/build-deploy-pipeline-testing.png)
 
 ## まとめ / 振り返り
 
