@@ -73,7 +73,8 @@ $ docker-compose up -d
 Concourse には、http://<CONCOURSE_EXTERNAL_URL>:8080 でアクセスできます。
 
 ### Concourse CLI (fly)のインストール
-アクセスした Councourse の画面から、インストールイメージをダウンロードして導入できます。
+Concourse の CLI として **fly** が提供されています。
+アクセスした Concourse の画面から、インストールイメージをダウンロードして導入できます。
 
 ![concourse](images/concourse.png)
 
@@ -146,7 +147,10 @@ App host = 10.10.148.171
 ```
 
 ### Concourse パイプラインの作成
+Concourse では、YAML ファイルによるパイプラインの定義を行います。
+
 #### Concourse へのログイン
+まず、`fly` コマンドで Concourse を操作出来るようにログインを行います。
 
 ```
 $ fly -t hello-ci login -c <CONCOURSE_EXTERNAL_URL>
@@ -161,11 +165,51 @@ or enter token manually:
 target saved
 ```
 
+#### パイプラインの作成
+単体テストを実行するパイプラインの定義を作成します。
+`pipeline.yml` という名前でファイルを作成し、以下の内容を記述します。
+
+```yaml
+
+---
+resources:
+- name: pcfapp
+  type: git
+  source:
+    uri: https://github.com/shinyay/pcf-workshop-upgrade-code.git
+    branch: master
+  check_every: 10s
+jobs:
+- name: unit-test
+  plan:
+  - get: pcfapp
+    trigger: true
+  - task: gradle-test
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          {repository: java, tag: openjdk-8}
+      inputs:
+      - name: pcfapp
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          cd pcfapp
+          ./gradlew tasks
+```
+
 #### パイプラインの登録
+次に、単体テスト用のパイプラインを Concourse に登録します。
 
 ```
 $ fly -t hello-ci set-pipeline -p simple-pipeline -c pipeline.yml
 ```
+
+<details><summary>実行結果</summary>
 
 ```
 resources:
@@ -209,15 +253,28 @@ the pipeline is currently paused. to unpause, either:
   - run the unpause-pipeline command
   - click play next to the pipeline in the web ui
 ```
+</details>
+
+#### パイプラインの確認
+ブラウザから Concourse にアクセスして登録したパイプラインを確認します。
+
+- http://<CONCOURSE_EXTERNAL_URL>/teams/main/pipelines/simple-pipeline
 
 ![simple pipeline](images/simple-pipeline.png)
 
-```
+### Concourse パイプラインの開始
+パイプラインの登録時点では、パイプラインは一時停止状態になっています。
+そこで、以下のコマンドを使用して開始します。
 
+- 一時停止状態の解除
+
+```
 $ fly -t hello-ci unpause-pipeline -p simple-pipeline
 
 unpaused 'simple-pipeline'
 ```
+
+- 単体テストジョブの開始
 
 ```
 $ fly -t hello-ci trigger-job -j simple-pipeline/unit-test
@@ -225,9 +282,17 @@ $ fly -t hello-ci trigger-job -j simple-pipeline/unit-test
 started simple-pipeline/unit-test #1
 ```
 
+#### Concourse パイプラインの実行中の状態
+
+ジョブが動き始めると、黄色い枠が点滅します。
+
 ![unit test](images/unit-test.png)
 
+ジョブをクリックすると実行中のログを確認できます。
+
 ![unit test execution](images/unit-test-execution.png )
+
+ジョブが終了すると、正常に緑色に変化します。
 
 ![unit test succeed](images/unit-test-succeed.png)
 
