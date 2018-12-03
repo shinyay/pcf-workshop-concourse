@@ -496,3 +496,4 @@ App host = 10.10.148.247⏎
 
 ## 参考
 - [PCF Pipelines](https://github.com/pivotal-cf/pcf-pipelines)
+- [Concourse Samples and Recipes](https://github.com/pivotalservices/concourse-pipeline-samples)
