@@ -42,8 +42,14 @@ $ ./generate-keys.sh
 
 `CONCOURSE_EXTERNAL_URL` をローカルにアサインされたIPアドレスでアクセスするように設定します。
 
+bash の場合
 ```
 $ export CONCOURSE_EXTERNAL_URL=http://$(ipconfig getifaddr en0):8080
+```
+
+fish の場合
+```
+$ set -x CONCOURSE_EXTERNAL_URL http://(ipconfig getifaddr en0):8080
 ```
 
 docker-compose.yml を編集し、環境変数の `CONCOURSE_EXTERNAL_URL` を使用するように編集します。
