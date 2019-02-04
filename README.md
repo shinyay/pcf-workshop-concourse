@@ -88,7 +88,7 @@ Concourse の CLI として **fly** が提供されています。
 また、cURL を使用してインストールイメージをダウンロードして導入する事もできます。
 
 ```
-$ curl -LO https://github.com/concourse/concourse/releases/download/v4.2.1/fly_darwin_amd64
+$ curl -LO https://github.com/concourse/concourse/releases/download/v4.2.2/fly_darwin_amd64
 $ chmod +x fly_darwin_amd64
 $ mv fly_darwin_amd64 /usr/local/bin/fly
 ```
@@ -96,7 +96,7 @@ $ mv fly_darwin_amd64 /usr/local/bin/fly
 ```
 $ fly --version
 
-4.2.1
+4.2.2
 ```
 
 ### アップグレード前のアプリケーションのデプロイ
