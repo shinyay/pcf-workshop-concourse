@@ -29,15 +29,7 @@ yum install docker -y
 Concourse コンテナを使用するための定義ファイル (**docker-compose.yml**) を提供している GihHub リポジトリをクローンして使用します。
 
 ```
-$ git clone https://github.com/concourse/concourse-docker.git
-```
-
-Concourseのための鍵ファイルを作成します。
-以下のスクリプトを実行します。
-
-```
-$ cd concourse-docker
-$ ./generate-keys.sh
+$ git clone https://github.com/shinyay/pcf-workshop-concourse-container.git
 ```
 
 `CONCOURSE_EXTERNAL_URL` をローカルにアサインされたIPアドレスでアクセスするように設定します。
@@ -50,18 +42,6 @@ $ export CONCOURSE_EXTERNAL_URL=http://$(ipconfig getifaddr en0):8080
 fish の場合
 ```
 $ set -x CONCOURSE_EXTERNAL_URL http://(ipconfig getifaddr en0):8080
-```
-
-docker-compose.yml を編集し、環境変数の `CONCOURSE_EXTERNAL_URL` を使用するように編集します。
-
-```
-$ vi docker-compose.yml
-```
-
-以下のように修正します。
-
-```
-- CONCOURSE_EXTERNAL_URL=${CONCOURSE_EXTERNAL_URL}
 ```
 
 #### Concourse コンテナの起動
